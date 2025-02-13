@@ -18,4 +18,25 @@ const signUp = async (req, res) => {
   }
 };
 
-module.exports = { signUp };
+const signIn = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const newUser = user.find({ email });
+    if (!newUser) {
+      res.status(404).json({ error: "User not found!" });
+    }
+
+    const isMatch = await bcrypt.compare(password, newUser.password);
+    if (!isMatch) {
+      res.status(404).json({ error: "Password incorrect!" });
+    }
+
+    const token = newUser.generateToken();
+    res.status(201).json({ "Logged in": newUser, token: token });
+  } catch (error) {
+    res.status(404).json({ error: error });
+  }
+};
+
+module.exports = { signUp, signIn };
